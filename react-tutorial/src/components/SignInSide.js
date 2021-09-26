@@ -3,8 +3,6 @@ import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
 import Link from '@material-ui/core/Link';
 import Paper from '@material-ui/core/Paper';
 import Box from '@material-ui/core/Box';
@@ -72,16 +70,16 @@ export default function SignInSide({ history }) {
       password: _password,
     }
 
-    axios.post('/api', _post)
+    axios.post('auth' + '/signin', _post)
       .then(function (response) {
         console.log(response)
         console.log(response.data)
         if (response.data["success"] === true) {
           // 성공 창 출력
-          console.log(response.data)
           history.push("/Mainpage")
         } else {
           // 오류 창 출력
+          alert('아이디 혹은 비밀번호를 확인해주세요!')
         }
       })
   }
@@ -130,32 +128,32 @@ export default function SignInSide({ history }) {
                 setPassword(event.target.value)
               }}
             />
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
-            />
             <Button
               type="submit"
               fullWidth
               variant="contained"
               color="primary"
               className={classes.submit}
-
-
             >
               Sign In
             </Button>
             <Grid container>
               <Grid item xs>
                 <Link href="#" variant="body2"
+                  onClick={() => history.push('/ForgotIDfirst')}>
+                  Forgot ID?
+                </Link>
+              </Grid>
+              <Grid item xs>
+                <Link href="#" variant="body2"
                   onClick={() => history.push('/ForgotPWfirst')}>
                   Forgot password?
                 </Link>
               </Grid>
-              <Grid item>
+              <Grid>
                 <Link href="#" variant="body2"
                   onClick={() => { history.push("/SignUp") }}>
-                  {"Don't have an account? Sign Up"}
+                  Sign Up
                 </Link>
               </Grid>
             </Grid>
