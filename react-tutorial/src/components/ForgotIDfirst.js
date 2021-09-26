@@ -81,17 +81,20 @@ export default function ForgotIDfirst({ history }) {
                             name="name"
                             autoFocus
                         />
-                        <TextField
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            name="phone"
-                            label="Phone (-를 제외한 숫자만 입력)"
-                            type="phone"
-                            id="phone"
-                        />
                         <Grid container>
+                            <Grid item xs={7}>
+                                <TextField
+                                    variant="outlined"
+                                    margin="normal"
+                                    required
+                                    fullWidth
+                                    name="phone"
+                                    label="Phone (-를 제외한 숫자만 입력)"
+                                    type="phone"
+                                    id="phone"
+                                />
+                            </Grid>
+                            <Grid item xs={1}/>
                             <Grid item xs={4}>
                                 <Button
                                     type="submit"
@@ -103,19 +106,6 @@ export default function ForgotIDfirst({ history }) {
                                 >
                                     인증번호 전송
                                 </Button>
-                            </Grid>
-                            <Grid item xs={2} />
-                            <Grid item xs={6}>
-                                <TextField
-                                    variant="standard"
-                                    margin="normal"
-                                    required
-                                    fullWidth
-                                    name="phone"
-                                    label="인증번호 입력"
-                                    type="phone"
-                                    id="phone"
-                                />
                             </Grid>
                         </Grid>
                         <Button
