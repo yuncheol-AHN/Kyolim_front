@@ -101,7 +101,10 @@ export default function SignUp({history}) {
         address: '',
         addressDetail:'',
         phone: '',
+        gAuthCode: '',
+        iAuthCode: '',
         pMessage: '비밀번호 확인',
+        iotNum: '',
         confirmCheck: "false"
     });
 
@@ -115,15 +118,34 @@ export default function SignUp({history}) {
 
     })
 
+    const show = () => {
+        console.log(inputs.email)
+        console.log(inputs.password)
+        console.log(inputs.name)
+        console.log(inputs.birth)
+        console.log(inputs.address)
+        console.log(inputs.addressDetail)
+        console.log(inputs.iAuthCode)
+        console.log(inputs.iotNum)
+
+    }
 
     const { email, password, cPassword, name, birth, address, addressDetail, phone, pMessage } = inputs;
 
     //이메일 중복확인 함수
     const CheckDuplicateEmail = () => {
 
-        const request = axios.post('http://3.36.50.0:3000/auth/check_duplicate_email',email).then(response => console.log(response.data))
-
-        console.log(request)
+        axios.post('auth' + '/check_duplicate_email', inputs.email)
+      .then(function (response) {
+        console.log(response)
+        console.log(response.data)
+        if (response.data["success"] === true) {
+          alert('중복된 이메일이 없습니다!')
+        } else {
+          // 오류 창 출력
+          alert('이메일이 중복 됩니다!')
+        }
+      })
 
     };
 
@@ -138,9 +160,7 @@ export default function SignUp({history}) {
 
     //비밀번호 유효성 체크 함수
     const checkPassword = (e) => {
-        setInputs({
-            password: e.target.value
-        });
+        handleChange(e)
         // 8 ~15자 영무, 숫자 조합
         var regExp = /^(?=.*\d)(?=.*[a-zA-Z])[0-9a-zA-Z]{8,10}$/
         // 맞는 형식이면 true를 리턴
@@ -156,20 +176,60 @@ export default function SignUp({history}) {
 
     // 비밀번호 확인 비교 함수.
     const handleConfirmPassword = (e) => {
-        setInputs({
-            cPassword: e.target.value
-        });
+        handleChange(e);
 
-        if(inputs.cPassword !== inputs.password){
-            console.log(inputs.cPassword)
-            console.log(inputs.password)
-            return <TextField helperText="비밀번호가 일치하지 않습니다!"/>
+        if(e.target.value !== inputs.password){
+            console.log("비밀번호 불일치")
         }
         else {
-            console.log(inputs.cPassword)
-            console.log(inputs.password)
-            return <TextField helperText="비밀번호가 일치"/>
+            console.log("비밀번호 일치")
         }
+    };
+
+
+    const selfAuth = () => {
+        axios.post('auth' + '/signup_phone=auth', inputs.phone)
+            .then(function (response) {
+                console.log(response)
+                console.log(response.data)
+                if (response.data["success"] === true) {
+                alert('인증번호를 전송했습니다!')
+
+                setInputs({
+                    gAuthCode: response.data["data"]
+                })
+                } else {
+                // 오류 창 출력
+                alert('핸드폰 번호를 확인해주세요!')
+                }
+            })
+    }
+
+    //입력받은 인증번호 비교 함수
+    const checkAuthCode = () => {
+        if(inputs.iAuthCode === inputs.gAuthCode){
+            alert("인증 완료")
+        }
+        else{
+            alert("인증번호가 다릅니다!")
+        }
+    }
+
+    //IoT 중복확인 함수
+    const CheckIot = () => {
+
+        axios.post('auth' + '/checkIot', inputs.iotNum)
+      .then(function (response) {
+        console.log(response)
+        console.log(response.data)
+        if (response.data["success"] === true) {
+          alert('IoT 기기가 인증 되었습니다! ')
+        } else {
+          // 오류 창 출력
+          alert('이미 사용중인 IoT기기 입니다. 번호를 확인해주세요!')
+        }
+      })
+
     };
 
     const classes = useStyles();
@@ -264,7 +324,7 @@ export default function SignUp({history}) {
                                 <Grid item xs={12}>
                                     <TextField
                                         className="invalid-feedback"
-                                        onChange="handleChange();handleConfirmPassword()"
+                                        onChange={handleConfirmPassword}
                                         name="cPassword"
                                         variant="outlined"
                                         required
@@ -299,13 +359,14 @@ export default function SignUp({history}) {
                                         required
                                         fullWidth
                                         id="phone"
-                                        label="전화번호(예:010-xxxx-xxxx)"
+                                        label="전화번호('-'자 없이)"
                                         autoFocus
                                     />
                                 </Grid>
 
                                 { /* 본인인증 확인 버튼 */}
                                 <Button
+                                    onClick={selfAuth}
                                     variant="outlined"
                                     size="small"
                                     color="primary"
@@ -313,6 +374,34 @@ export default function SignUp({history}) {
                                 >
                                     본인인증
                                 </Button>
+
+
+                                {/* 본인인증 번호 입력 텍스트*/}
+                                <Grid item xs={12} sm={9}>
+                                    <TextField
+                                        onChange={handleChange}
+                                        autoComplete="current-authCode"
+                                        name="iAuthCode"
+                                        variant="outlined"
+                                        required
+                                        fullWidth
+                                        id="authCode"
+                                        label="인증번호"
+                                        autoFocus
+                                    />
+                                </Grid>
+
+                                { /* 인증번호 확인 버튼 */}
+                                <Button
+                                    onClick={checkAuthCode}
+                                    variant="outlined"
+                                    size="small"
+                                    color="primary"
+                                    className={classes.margin}
+                                >
+                                    인증확인
+                                </Button>
+
 
                                 {/* 생년월일 */}
                                 <Grid item xs={12} sm={12}>
@@ -369,6 +458,30 @@ export default function SignUp({history}) {
                                     />
                                 </Grid>
 
+                                {/* IoT넘버 */}
+                                <Grid item xs={12} sm={9}>
+                                    <TextField
+                                        onChange={handleChange}
+                                        name="iotNum"
+                                        variant="outlined"
+                                        required
+                                        fullWidth
+                                        id="iotNum"
+                                        label="IoT넘버"
+                                        autoComplete="current-iotNum"
+                                    />
+                                </Grid>
+                                { /* IoT 중복확인 버튼 */}
+                                <Button
+                                    onClick={CheckIot}
+                                    variant="outlined"
+                                    size="small"
+                                    color="primary"
+                                    className={classes.margin}
+                                >
+                                    중복확인
+                                </Button>
+
                                 <Grid item xs={12}>
                                     <FormControlLabel
                                         control={<Checkbox value="allowExtraEmails" color="primary" />}
@@ -378,7 +491,7 @@ export default function SignUp({history}) {
                             </Grid>
                             <Button
                                 // onClick={reqSignUp}
-                                type="submit"
+                                onClick={show}
                                 fullWidth
                                 variant="contained"
                                 color="primary"
