@@ -17,7 +17,8 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.3",
     "redux": "^4.1.1",
-    "web-vitals": "^1.1.2"
+    "web-vitals": "^1.1.2",
+    "yarn": "^1.22.11"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -43,6 +44,5 @@
       "last 1 safari version"
     ]
   },
-  "proxy":
-    "http://3.36.50.0:3000/"
+  "proxy": "http://3.36.50.0:3000/"
 }

@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useForm, Controller } from 'react-hook-form';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -19,14 +18,8 @@ import MenuItem from '@material-ui/core/MenuItem';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
-import DaumPostcode from 'react-daum-postcode';
-import Axios from'axios'
-import { RepeatOneSharp } from '@material-ui/icons';
-import axios from 'axios';
-{/* import { useDispatch } from 'react-redux';
-import { loginUser } from '../_actions/user_actions';
-import { ContactSupportOutlined } from '@material-ui/icons';
-*/}
+import axios from 'axios'
+
 
 
 function Copyright() {
@@ -97,14 +90,165 @@ const id = "daum-postcode"; // script가 이미 rending 되어 있는지 확인�
 const src = "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
 
 export default function SignUp({history}) {
+
+    //회원가입 필요한 변수객체
+    const [inputs, setInputs] = useState({
+        email: '',
+        password: '',
+        cPassword: '',
+        name: '',
+        birth: '',
+        address: '',
+        addressDetail:'',
+        phone: '',
+        gAuthCode: '',
+        iAuthCode: '',
+        pMessage: '비밀번호 확인',
+        iotNum: '',
+        confirmCheck: "false"
+    });
+
+    const [messages, setMessages] = useState({
+        email_msg: '',
+        pass_msg: '',
+        cpass_msg: '',
+        name_msg: '',
+        add_msg: '',
+        add_detail_msg: '',
+
+    })
+
+    const show = () => {
+        console.log(inputs.email)
+        console.log(inputs.password)
+        console.log(inputs.name)
+        console.log(inputs.birth)
+        console.log(inputs.address)
+        console.log(inputs.addressDetail)
+        console.log(inputs.iAuthCode)
+        console.log(inputs.iotNum)
+
+    }
+
+    const { email, password, cPassword, name, birth, address, addressDetail, phone, pMessage } = inputs;
+
+    //이메일 중복확인 함수
+    const CheckDuplicateEmail = () => {
+
+        axios.post('auth' + '/check_duplicate_email', inputs.email)
+      .then(function (response) {
+        console.log(response)
+        console.log(response.data)
+        if (response.data["success"] === true) {
+          alert('중복된 이메일이 없습니다!')
+        } else {
+          // 오류 창 출력
+          alert('이메일이 중복 됩니다!')
+        }
+      })
+
+    };
+
+    //입력되는 변수들을 최신화 해주는 함수.
+    const handleChange = (e) => {
+        const {value, name } = e.target;
+        setInputs({
+            ...inputs,
+            [name]: value
+        });
+    };
+
+    //비밀번호 유효성 체크 함수
+    const checkPassword = (e) => {
+        handleChange(e)
+        // 8 ~15자 영무, 숫자 조합
+        var regExp = /^(?=.*\d)(?=.*[a-zA-Z])[0-9a-zA-Z]{8,10}$/
+        // 맞는 형식이면 true를 리턴
+        if(regExp.test(e.target.value)){
+            console.log("true")
+        }
+        else{
+            console.log("false")
+        }
+
+    }
+
+
+    // 비밀번호 확인 비교 함수.
+    const handleConfirmPassword = (e) => {
+        handleChange(e);
+
+        if(e.target.value !== inputs.password){
+            console.log("비밀번호 불일치")
+        }
+        else {
+            console.log("비밀번호 일치")
+        }
+    };
+
+
+    const selfAuth = () => {
+        axios.post('auth' + '/signup_phone=auth', inputs.phone)
+            .then(function (response) {
+                console.log(response)
+                console.log(response.data)
+                if (response.data["success"] === true) {
+                alert('인증번호를 전송했습니다!')
+
+                setInputs({
+                    gAuthCode: response.data["data"]
+                })
+                } else {
+                // 오류 창 출력
+                alert('핸드폰 번호를 확인해주세요!')
+                }
+            })
+    }
+
+    //입력받은 인증번호 비교 함수
+    const checkAuthCode = () => {
+        if(inputs.iAuthCode === inputs.gAuthCode){
+            alert("인증 완료")
+        }
+        else{
+            alert("인증번호가 다릅니다!")
+        }
+    }
+
+    //IoT 중복확인 함수
+    const CheckIot = () => {
+
+        axios.post('auth' + '/checkIot', inputs.iotNum)
+      .then(function (response) {
+        console.log(response)
+        console.log(response.data)
+        if (response.data["success"] === true) {
+          alert('IoT 기기가 인증 되었습니다! ')
+        } else {
+          // 오류 창 출력
+          alert('이미 사용중인 IoT기기 입니다. 번호를 확인해주세요!')
+        }
+      })
+
+    };
+
     const classes = useStyles();
     const postcodeRef = useRef < HTMLDivElement | null > (null);
 
-    const loadLayout = () => {
+    var curr = new Date();
+    curr.setDate(curr.getDate() + 3);
+    var date = curr.toISOString().substring(0,10);
+
+
+    const loadLayout = (e) => {
         window.daum.postcode.load(() => {
             const postcode = new window.daum.Postcode({
                 oncomplete: function (data) {
-                    console.log(data);
+                    setInputs({
+                        ...inputs,
+                        address: data.address
+                    });
+                    console.log(address)
                 }
             });
             postcode.open();
@@ -121,95 +265,13 @@ export default function SignUp({history}) {
             document.body.append(script);
         }
     }, []);
-    
-    const [users, setUsers] = useState([
-        {
-        user_id: 0,
-        email: "abc",
-        password: "09",
-        name: "미미",
-        phone: " ",
-        accessToken: " ",
-        refreshToken: " ",
-        salt: " "
-        },
-    ]);
 
-    {/*const { user_id, email, password, name, phone, accessToken, refreshToken, salt } = users;*/}
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [passwordconfirm, setPasswordconfirm] = useState('');
-    const [phone, setPhone] = useState('');
-    const [name, setName] = useState('');
-
-    const eHandler = (e) => {
-        e.preventDefault()
-        if (email) {
-            console.log(email)
-        }
-        if (password) {
-            console.log(password)
-        }
-        if (passwordconfirm) {
-            console.log(passwordconfirm)
-        }
-        if (name) {
-            console.log(name)
-        }
-
-        if (password !== passwordconfirm) {
-            alert('비밀번호와 비밀번호 확인이다릅니다 !')
-        } else {
-            let temp = {
-                email: email,
-                password: password,
-                phone: phone,
-                name: name,
-            }
-
-            setUsers(users.push(temp))
-            console.log(users)
-
-            axios.post('/api', temp)
-            .then(function (response){
-                console.log(response);
-            })
-            
-            // const request = 
-            {/*
-            Axios.post('http://3.36.50.0:3000/auth/signup', temp)
-                //성공시 then 실행
-                .then(function (response) {
-                    console.log(response);
-                })
-                //실패 시 catch 실행
-                .catch(function (error) {
-                    console.log(error);
-                });
-            */}
-            
-
-                // console.log(request);
-        }
-
-    }
-
-    {/*
-    const onDataChange = (e) => {
-        const { email, values } = e.target;
-
-        setUsers({
-            ...users,
-            [email]: values
-        });
-    }
-    */}
     return (
         <Grid container component="main" className={classes.root}>
             <CssBaseline />
             <Grid item xs={false} sm={4} md={7} className={classes.image} />
             <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
-                <Container component="main" maxWidth="xs" onSubmit={eHandler}>
+                <Container component="main" maxWidth="xs">
                     <CssBaseline />
                     <div className={classes.paper}>
                         <Avatar className={classes.avatar}>
@@ -223,21 +285,19 @@ export default function SignUp({history}) {
                                 {/* 아이디 */}
                                 <Grid item xs={12} sm={9}>
                                     <TextField
-                                        value={email}
-                                        label="email"
+                                        onChange={handleChange}
+                                        name="email"
                                         variant="outlined"
                                         required
                                         fullWidth
-                                        // id="email"
-                                        // name="email"
-                                        // autoComplete="email"
-                                        onChange={(e) => {
-                                            setEmail(e.target.value)
-                                        }}
+                                        id="email"
+                                        label="아이디"
+                                        autoComplete="current-email"
                                     />
                                 </Grid>
                                 { /* 아이디 중복확인 버튼 */}
                                 <Button
+                                    onClick={CheckDuplicateEmail}
                                     variant="outlined"
                                     size="small"
                                     color="primary"
@@ -245,109 +305,134 @@ export default function SignUp({history}) {
                                 >
                                     중복확인
                                 </Button>
+
                                 {/* 비밀번호 */}
                                 <Grid item xs={12}>
                                     <TextField
-                                        type="password"
-                                        value={password}
+                                        onChange={checkPassword}
+                                        name="password"
                                         variant="outlined"
                                         required
                                         fullWidth
-                                        name="password"
-                                        label="비밀번호(8-18자)"
+                                        label="비밀번호(8-15자)"
+                                        type="password"
                                         id="password"
                                         autoComplete="current-password"
-                                        onChange={(e)=>{
-                                            setPassword(e.target.value)
-                                        }}
                                     />
+                                </Grid>
                                     {/* 비밀번호 확인 */}
-                                    <Grid item xs={12}>
-                                        <TextField
-                                            type="password"
-                                            value={passwordconfirm}
-                                            variant="outlined"
-                                            required
-                                            fullWidth
-                                            name="passwordconfirm"
-                                            label="비밀번호 확인"
-                                            id="passwordconfirm"
-                                            autoComplete="confirm-password"
-                                            onChange={(e)=>{
-                                                setPasswordconfirm(e.target.value)
-                                            }}
-                                        />
-                                    </Grid>
+                                <Grid item xs={12}>
+                                    <TextField
+                                        className="invalid-feedback"
+                                        onChange={handleConfirmPassword}
+                                        name="cPassword"
+                                        variant="outlined"
+                                        required
+                                        fullWidth
+                                        label="비밀번호 확인"
+                                        type="password"
+                                        id="cPassword"
+                                        autoComplete="confirm-password"
+                                    />
                                 </Grid>
 
                                 {/* 이름 */}
-                                <Grid item xs={12} sm={6}>
+                                <Grid item xs={12} sm={12}>
                                     <TextField
-                                        value={name}
-                                        autoComplete="fname"
-                                        name="firstName"
+                                        autoComplete="name"
+                                        name="name"
                                         variant="outlined"
                                         required
                                         fullWidth
-                                        id="firstName"
+                                        id="name"
                                         label="이름"
                                         autoFocus
-                                        onChange={(e)=>{
-                                            setName(e.target.value)
-                                        }}
                                     />
                                 </Grid>
-                                {/* 성 */}
-                                <Grid item xs={12} sm={6}>
+
+                                {/* 휴대폰 번호 */}
+                                <Grid item xs={12} sm={9}>
                                     <TextField
-                                        variant="outlined"
-                                        required
-                                        fullWidth
-                                        id="lastName"
-                                        label="성"
-                                        name="lastName"
-                                        autoComplete="lname"
-                                    />
-                                </Grid>
-                                {/* 생년월일 */}
-                                <form className={classes.container} noValidate>
-                                    <TextField
-                                        id="birthday"
-                                        label="생년월일"
-                                        type="birthday"
-                                        defaultValue="1950-01-01"
-                                        className={classes.textField}
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-                                    />
-                                </form>
-                                {/* 전화번호 */}
-                                <Grid item xs={12}>
-                                    <TextField
-                                        value={phone}
+                                        autoComplete="current-phone"
+                                        name="phone"
                                         variant="outlined"
                                         required
                                         fullWidth
                                         id="phone"
-                                        label="phone"
-                                        name="phone"
-                                        autoComplete="phone"
-                                        onChange={(e)=> {
-                                            setPhone(e.target.value)
-                                        }}
+                                        label="전화번호('-'자 없이)"
+                                        autoFocus
                                     />
                                 </Grid>
+
+                                { /* 본인인증 확인 버튼 */}
+                                <Button
+                                    onClick={selfAuth}
+                                    variant="outlined"
+                                    size="small"
+                                    color="primary"
+                                    className={classes.margin}
+                                >
+                                    본인인증
+                                </Button>
+
+
+                                {/* 본인인증 번호 입력 텍스트*/}
+                                <Grid item xs={12} sm={9}>
+                                    <TextField
+                                        onChange={handleChange}
+                                        autoComplete="current-authCode"
+                                        name="iAuthCode"
+                                        variant="outlined"
+                                        required
+                                        fullWidth
+                                        id="authCode"
+                                        label="인증번호"
+                                        autoFocus
+                                    />
+                                </Grid>
+
+                                { /* 인증번호 확인 버튼 */}
+                                <Button
+                                    onClick={checkAuthCode}
+                                    variant="outlined"
+                                    size="small"
+                                    color="primary"
+                                    className={classes.margin}
+                                >
+                                    인증확인
+                                </Button>
+
+
+                                {/* 생년월일 */}
+                                <Grid item xs={12} sm={12}>
+                                    <form className={classes.container} noValidate>
+                                        <TextField
+                                            onChange={handleChange}
+                                            name="birth"
+                                            id="birth"
+                                            label="생년월일"
+                                            type="date"
+                                            defaultValue={date}
+                                            className={classes.textField}
+                                            InputLabelProps={{
+                                                shrink: true,
+                                            }}
+                                        />
+                                    </form>
+                                </Grid>
+
                                 {/* 주소 */}
                                 <Grid item xs={12} sm={9}>
                                     <TextField
+                                        onClick={loadLayout}
                                         variant="outlined"
                                         required
                                         fullWidth
                                         id="address"
+                                        value= {address}
                                         label="주소"
                                         name="address"
-                                        autoComplete="address"
+                                        autoComplete="current-address"
                                     />
                                 </Grid>
                                 { /* 주소검색 버튼 */}
@@ -362,36 +447,41 @@ export default function SignUp({history}) {
                                 </Button>
                                 <Grid item xs={12}>
                                     <TextField
+                                        onChange={handleChange}
                                         variant="outlined"
                                         required
                                         fullWidth
-                                        id="address_detail"
+                                        id="addressDetail"
                                         label="상세주소"
-                                        name="address_detail"
-                                        autoComplete="address_detail"
+                                        name="addressDetail"
+                                        autoComplete="addressDetail"
                                     />
                                 </Grid>
-                                {/* IOT 넘버 */}
+
+                                {/* IoT넘버 */}
                                 <Grid item xs={12} sm={9}>
                                     <TextField
+                                        onChange={handleChange}
+                                        name="iotNum"
                                         variant="outlined"
                                         required
                                         fullWidth
                                         id="iotNum"
-                                        label="IOT 번호입력"
-                                        name="iotNum"
-                                        autoComplete="iotNum"
+                                        label="IoT넘버"
+                                        autoComplete="current-iotNum"
                                     />
                                 </Grid>
-                                { /* IOT 인증 버튼 */}
+                                { /* IoT 중복확인 버튼 */}
                                 <Button
+                                    onClick={CheckIot}
                                     variant="outlined"
                                     size="small"
                                     color="primary"
                                     className={classes.margin}
                                 >
-                                    IOT 인증
+                                    중복확인
                                 </Button>
+
                                 <Grid item xs={12}>
                                     <FormControlLabel
                                         control={<Checkbox value="allowExtraEmails" color="primary" />}
@@ -400,12 +490,13 @@ export default function SignUp({history}) {
                                 </Grid>
                             </Grid>
                             <Button
-                                type="submit"
+                                // onClick={reqSignUp}
+                                onClick={show}
                                 fullWidth
                                 variant="contained"
                                 color="primary"
                                 className={classes.submit}
-                                // onClick={()=> history.push('/')}
+                                onClick={()=> history.push('/')}
                             >
                                 회원 가입 완료
                             </Button>
