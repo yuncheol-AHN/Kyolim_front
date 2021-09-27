@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -10,6 +10,8 @@ import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
+import axios from 'axios';
+import {useHistory} from 'react-router-dom'
 
 function Copyright() {
     return (
@@ -55,11 +57,40 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export default function ForgotIDfirst({ history }) {
+export default function ForgotIDfirst() {
     const classes = useStyles();
+    const history = useHistory();
 
+    const [name, setName] = useState('');
+    const [phone, setPhone] = useState('');
+
+    const eHandler = (e) => {
+        e.preventDefault();
+
+        let _post = {
+            name: name,
+            phone: phone,
+        }
+        
+        // [name, phone] -> email
+        axios.post('auth' + '/findId', _post)
+            .then(function (response) {
+                if (response.data["success"] === 1) {
+                    // 성공 창 출력
+                    alert('email : ' + response.data["email"]["email"])
+                    history.push('/')
+                    {/*history.push({
+                        pathname: '/ForgotIDsecond',
+                        state: {res: response.data["email"]["email"]}
+                    })*/}
+                } else {
+                    // 오류 창 출력
+                    alert('인증번호를 확인해주세요!')
+                }
+            })
+    }
     return (
-        <Grid container component="main" className={classes.root}>
+        <Grid container component="main" className={classes.root} onSubmit={eHandler}>
             <CssBaseline />
             <Grid item xs={false} sm={4} md={7} className={classes.image} />
             <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
@@ -80,6 +111,11 @@ export default function ForgotIDfirst({ history }) {
                             label="Name"
                             name="name"
                             autoFocus
+
+                            value={name}
+                            onChange={(event) => {
+                                setName(event.target.value)
+                            }}
                         />
                         <Grid container>
                             <Grid item xs={7}>
@@ -92,6 +128,11 @@ export default function ForgotIDfirst({ history }) {
                                     label="Phone (-를 제외한 숫자만 입력)"
                                     type="phone"
                                     id="phone"
+
+                                    value={phone}
+                                    onChange={(e)=>{
+                                        setPhone(e.target.value)
+                                    }}
                                 />
                             </Grid>
                             <Grid item xs={1}/>
@@ -99,10 +140,10 @@ export default function ForgotIDfirst({ history }) {
                                 <Button
                                     type="submit"
                                     fullWidth
-                                    variant="contained"
+                                    variant="outlined"
                                     color="primary"
+                                    size='large'
                                     className={classes.submit}
-                                    onClick={() => history.push('/ForgotIDsecond')}
                                 >
                                     인증번호 전송
                                 </Button>
@@ -114,9 +155,9 @@ export default function ForgotIDfirst({ history }) {
                             variant="contained"
                             color="primary"
                             className={classes.submit}
-                            onClick={() => history.push('/ForgotIDsecond')}
+                            onClick={() => history.push('/')}
                         >
-                            로그인 페이지로
+                            go to signin
                         </Button>
                         {/* <FormControlLabel
                             control={<Checkbox value="remember" color="primary" />}

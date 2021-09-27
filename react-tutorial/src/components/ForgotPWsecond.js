@@ -1,11 +1,8 @@
-import React from 'react';
-import { Link as RouterLink, Route, BrowserRouter } from 'react-router-dom';
+import React, {useState} from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
 import Link from '@material-ui/core/Link';
 import Paper from '@material-ui/core/Paper';
 import Box from '@material-ui/core/Box';
@@ -13,6 +10,8 @@ import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
+import {useHistory, useLocation} from 'react-router-dom'
+import axios from 'axios'
 
 function Copyright() {
     return (
@@ -61,6 +60,36 @@ const useStyles = makeStyles((theme) => ({
 export default function ForgotPWsecond({ history }) {
     const classes = useStyles();
 
+    const [confirm, setConfirm] = useState('');
+
+    const location = useLocation();
+
+    console.log(location.state['re'])
+    console.log('confirm ', confirm)
+
+    const eHandler = (e) => {
+        e.preventDefault()
+
+        if (confirm === location.state['re']) {
+            alert('success, 메일로 임시 비밀번호가 발송됩니다.')
+            axios.post('auth' + '/find_password/phone_auth', location.state['email'])
+                .then(function (response) {
+                    console.log(response.data)
+                    if (response.data["success"] === true) {
+                        // 성공 창 출력
+                        console.log('success', response.data)
+                        history.push("/")
+                    } else {
+                        // 오류 창 출력
+                        alert('아이디 혹은 비밀번호를 확인해주세요!')
+                    }
+                })
+            history.push('/')
+        } else {
+            alert("fail");
+        }
+    }
+
     return (
         <Grid container component="main" className={classes.root}>
             <CssBaseline />
@@ -79,10 +108,9 @@ export default function ForgotPWsecond({ history }) {
                             margin="normal"
                             required
                             fullWidth
-                            id="email"
-                            label="Email Address"
-                            name="email"
-                            autoComplete="email"
+                            id="name"
+                            label="Name"
+                            name="name"
                             autoFocus
                         />
                         <TextField
@@ -90,43 +118,53 @@ export default function ForgotPWsecond({ history }) {
                             margin="normal"
                             required
                             fullWidth
-                            name="password"
-                            label="가입된 이름 입력"
-                            type="password"
-                            id="password"
-                            autoComplete="current-password"
+                            name="phone"
+                            label="Phone (-를 제외한 숫자만 입력)"
+                            type="phone"
+                            id="phone"
                         />
-                        <TextField
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            name="password"
-                            label="가입된 휴대폰번호 입력"
-                            type="password"
-                            id="password"
-                            autoComplete="current-password"
-                        />
-                        <TextField
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            name="password"
-                            label="인증번호 입력"
-                            type="password"
-                            id="password"
-                            autoComplete="current-password"
-                        />
+                        <Grid container>
+                            <Grid item xs={6}>
+                                <TextField
+                                    variant="standard"
+                                    margin="normal"
+                                    required
+                                    fullWidth
+                                    name="confirm"
+                                    label="input confirm number"
+                                    id="confirm"
+
+                                    value={confirm}
+                                    onChange={(e) => {
+                                        e.preventDefault();
+                                        setConfirm(e.target.value);
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={2} />
+                            <Grid item xs={4}>
+                                <Button
+                                    type="submit"
+                                    fullWidth
+                                    variant="outlined"
+                                    color="primary"
+                                    size='large'
+                                    className={classes.submit}
+                                    onClick={eHandler}
+                                >
+                                    인증번호 입력
+                                </Button>
+                            </Grid>
+                        </Grid>
                         <Button
-                            onClick={function () { history.push('/ForgotPWthird') }}
                             type="submit"
                             fullWidth
                             variant="contained"
                             color="primary"
                             className={classes.submit}
+                            onClick={() => history.push('/')}
                         >
-                            Enter
+                            go to signin
                         </Button>
                         {/* <FormControlLabel
                             control={<Checkbox value="remember" color="primary" />}
@@ -134,12 +172,14 @@ export default function ForgotPWsecond({ history }) {
                         /> */}
                         <Grid container>
                             <Grid item xs>
-                                <Link href="#" variant="body2">
-                                    Forgot password?
+                                <Link href="#" variant="body2"
+                                onClick={history.push('/')}>
+                                    Go to Signin
                                 </Link>
                             </Grid>
                             <Grid item>
-                                <Link href="#" variant="body2">
+                                <Link href="#" variant="body2"
+                                onClick={history.push('/SignUp')}>
                                     {"Don't have an account? Sign Up"}
                                 </Link>
                             </Grid>

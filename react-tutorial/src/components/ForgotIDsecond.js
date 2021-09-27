@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -10,6 +10,8 @@ import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
+import axios from 'axios'
+import {useHistory, useLocation} from 'react-router-dom'
 
 function Copyright() {
     return (
@@ -55,11 +57,26 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export default function ForgotIDsecond({ history }) {
+export default function ForgotIDsecond( {history} ) {
     const classes = useStyles();
+    const location = useLocation();
+    const [confirm, setConfirm] = useState('');
+
+    const confirmNum = location.state;
+
+    const eHandler = (e) => {
+        e.preventdefault();
+        console.log(location)
+        console.log(confirmNum)
+        if (confirm === confirmNum) {
+            alert("success");
+        } else {
+            alert("fail");
+        }
+    }
 
     return (
-        <Grid container component="main" className={classes.root}>
+        <Grid container component="main" className={classes.root} onSubmit={eHandler}>
             <CssBaseline />
             <Grid item xs={false} sm={4} md={7} className={classes.image} />
             <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
@@ -91,16 +108,41 @@ export default function ForgotIDsecond({ history }) {
                             type="phone"
                             id="phone"
                         />
-                        <TextField
-                            variant='standard'
-                            margin="normal"
-                            required
-                            fullWidth
-                            name="phone"
-                            label="인증번호 입력"
-                            type="phone"
-                            id="phone"
-                        />
+                        <Grid container>
+                            <Grid item xs={6}>
+                                <TextField
+                                    variant="standard"
+                                    margin="normal"
+                                    required
+                                    fullWidth
+                                    name="confirm"
+                                    label="input confirm number"
+                                    id="confirm"
+
+                                    value={confirm}
+                                    onChange={(e) => {
+                                        setConfirm(e.target.value)
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={2} />
+                            <Grid item xs={4}>
+                                <Button
+                                    type="submit"
+                                    fullWidth
+                                    height
+                                    variant="outlined"
+                                    color="primary"
+                                    size='large'
+                                    className={classes.submit}
+                                    onClick={
+                                        console.log('hello', location.state)
+                                    }
+                                >
+                                    인증번호 입력
+                                </Button>
+                            </Grid>
+                        </Grid>
                         <Button
                             type="submit"
                             fullWidth
@@ -111,6 +153,10 @@ export default function ForgotIDsecond({ history }) {
                         >
                             go to signin
                         </Button>
+                        <TextField>
+                            
+                        </TextField>
+                            
                         {/* <FormControlLabel
                             control={<Checkbox value="remember" color="primary" />}
                             label="Remember me"
