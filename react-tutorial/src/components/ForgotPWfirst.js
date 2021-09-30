@@ -11,7 +11,6 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import axios from 'axios';
-import {useHistory} from 'react-router-dom'
 
 function Copyright() {
     return (
@@ -62,10 +61,11 @@ export default function ForgotPWfirst({history}) {
 
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
+    const [confirmTo, setConfirmTo] = useState('');
+    const [confirmFrom, setConfirmFrom] = useState('');
 
-    const eHandler = (e) => {
+    const sendCert = (e) => {
         e.preventDefault();
-
         const _post ={
             email: email,
             phone: phone,
@@ -75,18 +75,48 @@ export default function ForgotPWfirst({history}) {
             .then(function (response) {
                 if (response.data["success"] === true) {
                     // 성공 창 출력
-                    history.push({
+
+                    {/*history.push({
                         pathname: '/ForgotPWsecond',
                         state: { 
                             re: response.data["data"],
                             email: email,
                         }
-                    })
+                    })*/}
+                    setConfirmFrom(response.data["data"]);
+                    console.log('confirm number from server : ', response.data['data'])
+                    alert('인증번호를 전송했습니다')
+
                 } else {
                     // 오류 창 출력
-                    alert('아이디 혹은 비밀번호를 확인해주세요!')
+                    alert('존재하지 않는 이메일과 휴대폰번호입니다')
                 }
             })
+    }
+
+    const inputCert = (e) => {
+        e.preventDefault();
+
+        const _post = {
+            email: email,
+        }
+
+        if (confirmTo === confirmFrom) {
+            axios.post('auth' + '/find_password/phone_auth', _post)
+                .then(function (response) {
+                    if (response.data["success"] === true) {
+                        // 성공 창 출력
+                        alert('임시비밀번호를 입력하신 이메일로 전송했습니다')
+                        // alert(response.data['message'])
+                        console.log('return', response.data)
+                    } else {
+                        // 오류 창 출력
+                        
+                    }
+                })
+        } else {
+            alert('인증번호를 확인해주세요')
+        }
     }
 
     return (
@@ -118,7 +148,7 @@ export default function ForgotPWfirst({history}) {
                             }}
                         />
                         <Grid container>
-                            <Grid item xs={7}>
+                            <Grid item xs={8}>
                                 <TextField
                                     variant="outlined"
                                     margin="normal"
@@ -134,19 +164,52 @@ export default function ForgotPWfirst({history}) {
                                     }}
                                 />
                             </Grid>
-                            <Grid item xs={1} />
-                            <Grid item xs={4}>
+                            <Grid item xs={2} />
+                            <Grid item xs={2}>
                                 <Button
                                     type="submit"
                                     fullWidth
                                     variant="outlined"
                                     color="primary"
-                                    size='medium'
+                                    size='small'
                                     className={classes.submit}
 
-                                    onClick={eHandler}
+                                    onClick={sendCert}
                                 >
                                     인증번호 전송
+                                </Button>
+                            </Grid>
+                        </Grid>
+                        <Grid container>
+                            <Grid item xs={8}>
+                                <TextField
+                                    variant="standard"
+                                    margin="normal"
+                                    required
+                                    fullWidth
+                                    name="confirm"
+                                    label="Input confirm number"
+                                    id="confirm"
+
+                                    value={confirmTo}
+                                    onChange={(e) => {
+                                        e.preventDefault();
+                                        setConfirmTo(e.target.value);
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={2} />
+                            <Grid item xs={2}>
+                                <Button
+                                    type="submit"
+                                    fullWidth
+                                    variant="outlined"
+                                    color="primary"
+                                    size='small'
+                                    className={classes.submit}
+                                    onClick={inputCert}
+                                >
+                                    인증번호 입력
                                 </Button>
                             </Grid>
                         </Grid>

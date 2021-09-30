@@ -77,7 +77,7 @@ export default function ForgotIDfirst() {
             .then(function (response) {
                 if (response.data["success"] === 1) {
                     // 성공 창 출력
-                    alert('email : ' + response.data["email"]["email"])
+                    alert('email : ' + response.data["email"]["email"] + "\n로그인화면으로 이동합니다")
                     history.push('/')
                     {/*history.push({
                         pathname: '/ForgotIDsecond',
@@ -85,7 +85,7 @@ export default function ForgotIDfirst() {
                     })*/}
                 } else {
                     // 오류 창 출력
-                    alert('인증번호를 확인해주세요!')
+                    alert('이름과 휴대폰번호에 해당하는 가입자가 존재하지 않습니다')
                 }
             })
     }
