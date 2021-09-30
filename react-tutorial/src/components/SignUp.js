@@ -109,14 +109,14 @@ export default function SignUp({history}) {
 
     const [states, setStates] = useState({
 
-        emailState: true,
+        emailState: false,
         passwordState: false,
         cPasswordState: false,
         nameState: false,
         birthState: false,
         addressState: false,
         phoneState: false,
-        iotNumState: true,
+        iotNumState: false,
 
         signupState: false
 
@@ -154,22 +154,34 @@ export default function SignUp({history}) {
     //이메일 중복확인 함수
     const checkDuplicateEmail = () => {
 
-        axios.post('auth' + '/check_duplicate_email', inputs.email)
-      .then(function (response) {
-        console.log(response)
-        console.log(response.data)
+        var regExp = /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
 
-        if (response.data["success"] === true) {
-          alert('중복된 이메일이 없습니다!')
-          checkState('emailState',true)
-        } else {
-          // 오류 창 출력
-          alert('이메일이 중복 됩니다!')
-          checkState('emailState',false)
-        }
-      })
+        if(regExp.test(inputs.email)){
+            const body = {
+                email: inputs.email,
+            }
+            axios.post('auth' + '/check_duplicate_email', body)
+        .then(function (response) {
+            console.log(response)
+            console.log(response.data)
+
+            if (response.data["success"] === true) {
+            alert('중복된 이메일이 없습니다!')
+            checkState('emailState',true)
+            } else {
+            // 오류 창 출력
+            alert('이메일이 중복 됩니다!')
+            checkState('emailState',false)
+            }
+        })
+    }else{
+        alert("이메일 형식을 다시 확인해 주세요!")
+        checkState('emailState',false)
+    }
 
     };
+
+
 
     //비밀번호 유효성 체크 함수
     const checkPassword = (e) => {
@@ -214,22 +226,29 @@ export default function SignUp({history}) {
 
 
     const selfAuth = () => {
-        axios.post('auth' + '/signup_phone_auth', inputs.phone)
-            .then(function (response) {
-                console.log(response)
-                console.log(response.data)
-                if (response.data["success"] === true) {
-                alert('인증번호를 전송했습니다!')
+        if(inputs.phone.length !== 11){
+            alert("전화번호 형식을 체크해 주세요!")
+        }
+        else{
+            axios.post('auth' + '/signup_phone_auth', inputs.phone)
+                .then(function (response) {
+                    console.log(response)
+                    console.log(response.data)
+                    if (response.data["success"] === true) {
+                    alert('인증번호를 전송했습니다!')
 
-                setInputs({
-                    gAuthCode: response.data["data"]
+                    setInputs({
+                        ...inputs,
+                        gAuthCode: response.data["data"]
+                    })
+                    } else {
+                    // 오류 창 출력
+                    alert('핸드폰 번호를 확인해주세요!')
+                    }
                 })
-                } else {
-                // 오류 창 출력
-                alert('핸드폰 번호를 확인해주세요!')
-                }
-            })
+            }
     }
+
 
     //입력받은 인증번호 비교 함수
     const checkAuthCode = () => {
@@ -246,7 +265,10 @@ export default function SignUp({history}) {
     //IoT 중복확인 함수
     const checkIot = () => {
 
-        axios.post('auth' + '/checkIot', inputs.iotNum)
+        const body = {
+            Iotnum: inputs.iotNum,
+        }
+        axios.post('auth' + '/checkIot', body)
       .then(function (response) {
         console.log(response)
         console.log(response.data)
@@ -267,13 +289,34 @@ export default function SignUp({history}) {
         if(states.emailState === true && states.passwordState === true && states.cPasswordState === true && states.birthState === true && states.nameState === true && states.iotNumState === true && states.phoneState === true && states.addressState === true)
         {
             console.log("asldfjalskdjf;laskdjf;alksjdf;alk")
+
+            console.log(inputs.email)
+            console.log(inputs.password)
+            console.log(inputs.cPassword)
+            console.log(inputs.name)
+            console.log(inputs.phone)
+            console.log(inputs.birth)
+            console.log(inputs.address)
+            console.log(inputs.addressDetail)
+            console.log(inputs.iotNum)
+            console.log("==============")
+            console.log("email:"+states.emailState)
+            console.log("password:"+states.passwordState)
+            console.log("cpass"+states.cPasswordState)
+            console.log("name:"+states.nameState)
+            console.log("phone:"+states.phoneState)
+            console.log("birth:"+states.birthState)
+            console.log("add:"+states.addressState)
+            console.log("iot:"+states.iotNumState)
+
+
             const body = {
                 email: inputs.email,
                 password: inputs.password,
                 phone: inputs.phone,
                 name: inputs.name,
                 birth: inputs.birth,
-                address: inputs.address + inputs.addressDetail,
+                address: inputs.address,
                 Iotnum: inputs.iotNum
             }
 
@@ -293,24 +336,24 @@ export default function SignUp({history}) {
         else {
             alert("입력칸을 다 채워 주세요!")
 
-            // console.log(inputs.email)
-            // console.log(inputs.password)
-            // console.log(inputs.cPassword)
-            // console.log(inputs.name)
-            // console.log(inputs.phone)
-            // console.log(inputs.birth)
-            // console.log(inputs.address)
-            // console.log(inputs.addressDetail)
-            // console.log(inputs.iotNum)
-            // console.log("==============")
-            // console.log("email:"+states.emailState)
-            // console.log("password:"+states.passwordState)
-            // console.log("cpass"+states.cPasswordState)
-            // console.log("name:"+states.nameState)
-            // console.log("phone:"+states.phoneState)
-            // console.log("birth:"+states.birthState)
-            // console.log("add:"+states.addressState)
-            // console.log("iot:"+states.iotNumState)
+            console.log(inputs.email)
+            console.log(inputs.password)
+            console.log(inputs.cPassword)
+            console.log(inputs.name)
+            console.log(inputs.phone)
+            console.log(inputs.birth)
+            console.log(inputs.address)
+            console.log(inputs.addressDetail)
+            console.log(inputs.iotNum)
+            console.log("==============")
+            console.log("email:"+states.emailState)
+            console.log("password:"+states.passwordState)
+            console.log("cpass"+states.cPasswordState)
+            console.log("name:"+states.nameState)
+            console.log("phone:"+states.phoneState)
+            console.log("birth:"+states.birthState)
+            console.log("add:"+states.addressState)
+            console.log("iot:"+states.iotNumState)
 
         }
     }
@@ -441,6 +484,8 @@ export default function SignUp({history}) {
                                     <TextField
                                         onChange={handleChange}
                                         autoComplete="current-phone"
+                                        type="number"
+                                        inputProps={{ min: 0, max: 11 }}
                                         name="phone"
                                         variant="outlined"
                                         required
